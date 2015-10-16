@@ -148,6 +148,8 @@ public class NetworkHelperImpl implements NetworkHelper {
     @Inject
     protected VirtualMachineManager _itMgr;
     @Inject
+    private RouterControlHelper _routerControlHelper;
+    @Inject
     protected IpAddressManager _ipAddrMgr;
 
     protected final Map<HypervisorType, ConfigKey<String>> hypervisorsMap = new HashMap<>();

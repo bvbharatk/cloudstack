@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import com.vmware.vim25.ServiceContent;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -153,7 +154,6 @@ public class VmwareStorageProcessor implements StorageProcessor {
 
     private VirtualMachineMO copyTemplateFromSecondaryToPrimary(VmwareHypervisorHost hyperHost, DatastoreMO datastoreMo, String secondaryStorageUrl,
             String templatePathAtSecondaryStorage, String templateName, String templateUuid, boolean createSnapshot) throws Exception {
-
         s_logger.info("Executing copyTemplateFromSecondaryToPrimary. secondaryStorage: " + secondaryStorageUrl + ", templatePathAtSecondaryStorage: " +
                 templatePathAtSecondaryStorage + ", templateName: " + templateName);
 
@@ -311,6 +311,12 @@ public class VmwareStorageProcessor implements StorageProcessor {
 
                 dsMo = new DatastoreMO(context, morDs);
 
+                if(template.getFormat()==ImageFormat.TAR){
+                    //currently if a request is made to copy a tar file from secondary to primary
+                    //we assume that it is a vrupdate file.
+                    return copyFileToPrimary(template, dcMo, dsMo, secondaryStorageUrl);
+                }
+
                 if (managed) {
                     VirtualMachineMO vmMo = copyTemplateFromSecondaryToPrimary(hyperHost, dsMo, secondaryStorageUrl, templateInfo.first(), templateInfo.second(),
                             managedStoragePoolRootVolumeName, false);
@@ -361,6 +367,29 @@ public class VmwareStorageProcessor implements StorageProcessor {
 
             return new CopyCmdAnswer(msg);
         }
+    }
+
+    private Answer copyFileToPrimary(TemplateObjectTO template, DatacenterMO dcMo, DatastoreMO dsMo, String secStorageUrl) {
+            VmwareContext context=hostService.getServiceContext(null);
+            String remoteFolder=UUID.randomUUID().toString();
+            String remoteAbsFileName=remoteFolder+"/"+template.getName()+"."+template.getFormat().getFileExtension();
+            String localAbsFilePath=mountService.getMountPoint(secStorageUrl)+"/"+template.getPath();
+            String dataCenterName=null;
+            String dataStoreName=null;
+            try {
+                dataCenterName=dcMo.getName();
+                dataStoreName=dsMo.getName();
+                //make the folder into which we are copying the file.
+                ServiceContent content=context.getServiceContent();
+                dsMo.makeDirectory(String.format("[%s] %s", dsMo.getName(), remoteFolder), dcMo.getMor());
+                VmwareHelper.copyFileToDatastore(context, remoteAbsFileName, localAbsFilePath, dataCenterName, dataStoreName);
+                TemplateObjectTO newTemplate = new TemplateObjectTO();
+                newTemplate.setPath(remoteFolder);
+                return new CopyCmdAnswer(newTemplate);
+            }catch (Exception e){
+                 s_logger.error("Could not upload file:" + localAbsFilePath + " to vmware datacenter:" + dataCenterName + " and dataStore:" + dataStoreName, e);
+                 throw new CloudRuntimeException("Could not upload file:"+localAbsFilePath+" to vmware datacenter:"+dataCenterName+" and dataStore:"+dataStoreName);
+            }
     }
 
     private boolean createVMLinkedClone(VirtualMachineMO vmTemplate, DatacenterMO dcMo, DatastoreMO dsMo, String vmdkName, ManagedObjectReference morDatastore,

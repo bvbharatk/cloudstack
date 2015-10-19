@@ -717,4 +717,16 @@ public class VmwareHelper {
         return name;
     }
 
+    public static void copyFileToDatastore(VmwareContext context, String dsRemoteAbsFileName, String localAbsFileName, String dcName, String dsName)
+            throws Exception {
+        String serviceUrl = "https://" + context.getServerAddress();
+        String httpUrl = serviceUrl + "/folder/" + dsRemoteAbsFileName + "?dcPath="
+                + dcName + "&dsName=" + dsName;
+        httpUrl = httpUrl.replaceAll("\\ ", "%20");
+
+        s_logger.debug("Uploading file [" + localAbsFileName + "] to url [" + httpUrl);
+        context.uploadFile(httpUrl, localAbsFileName);
+        s_logger.debug("Successfully uploaded file [" + localAbsFileName + "] to url [" + httpUrl);
+    }
+
 }

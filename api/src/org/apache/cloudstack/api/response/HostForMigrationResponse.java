@@ -107,6 +107,10 @@ public class HostForMigrationResponse extends BaseResponse {
     @Param(description = "the amount of the host's CPU after applying the cpu.overprovisioning.factor ")
     private String cpuWithOverprovisioning;
 
+    @SerializedName("memorywithoverprovisioning")
+    @Param(description = "the amount of the host's memory after applying the mem.overprovisioning.factor ")
+    private String memWithOverprovisioning;
+
     @SerializedName("averageload")
     @Param(description = "the cpu average load on the host")
     private Long averageLoad;
@@ -119,13 +123,9 @@ public class HostForMigrationResponse extends BaseResponse {
     @Param(description = "the outgoing network traffic on the host")
     private Long networkKbsWrite;
 
-    @SerializedName("memorytotal")
-    @Param(description = "the memory total of the host")
-    private Long memoryTotal;
-
     @SerializedName("memoryallocated")
     @Param(description = "the amount of the host's memory currently allocated")
-    private Long memoryAllocated;
+    private String memoryAllocated;
 
     @SerializedName("memoryused")
     @Param(description = "the amount of the host's memory currently used")
@@ -305,11 +305,7 @@ public class HostForMigrationResponse extends BaseResponse {
         this.networkKbsWrite = networkKbsWrite;
     }
 
-    public void setMemoryTotal(Long memoryTotal) {
-        this.memoryTotal = memoryTotal;
-    }
-
-    public void setMemoryAllocated(Long memoryAllocated) {
+    public void setMemoryAllocated(String memoryAllocated) {
         this.memoryAllocated = memoryAllocated;
     }
 
@@ -399,6 +395,10 @@ public class HostForMigrationResponse extends BaseResponse {
 
     public void setCpuWithOverprovisioning(String cpuWithOverprovisioning) {
         this.cpuWithOverprovisioning = cpuWithOverprovisioning;
+    }
+
+    public void setMemWithOverprovisioning(String memWithOverprovisioning){
+        this.memWithOverprovisioning=memWithOverprovisioning;
     }
 
     public void setHypervisorVersion(String hypervisorVersion) {

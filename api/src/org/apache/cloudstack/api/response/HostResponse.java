@@ -124,13 +124,13 @@ public class HostResponse extends BaseResponse {
     @Param(description = "the outgoing network traffic on the host")
     private Long networkKbsWrite;
 
-    @SerializedName("memorytotal")
-    @Param(description = "the memory total of the host")
-    private Long memoryTotal;
+    @SerializedName("memorywithoverprovisioning")
+    @Param(description = "the amount of the host's memory after applying the mem.overprovisioning.factor")
+    private String memWithOverprovisioning;
 
     @SerializedName("memoryallocated")
     @Param(description = "the amount of the host's memory currently allocated")
-    private Long memoryAllocated;
+    private String memoryAllocated;
 
     @SerializedName("memoryused")
     @Param(description = "the amount of the host's memory currently used")
@@ -323,11 +323,11 @@ public class HostResponse extends BaseResponse {
         this.networkKbsWrite = networkKbsWrite;
     }
 
-    public void setMemoryTotal(Long memoryTotal) {
-        this.memoryTotal = memoryTotal;
+    public void setMemWithOverprovisioning(String memWithOverprovisioning){
+        this.memWithOverprovisioning=memWithOverprovisioning;
     }
 
-    public void setMemoryAllocated(Long memoryAllocated) {
+    public void setMemoryAllocated(String memoryAllocated) {
         this.memoryAllocated = memoryAllocated;
     }
 

@@ -29,6 +29,7 @@ public class StopCommand extends RebootCommand {
     boolean executeInSequence = false;
     private GPUDeviceTO gpuDevice;
     boolean checkBeforeCleanup = false;
+    String controlIp = null;
 
     protected StopCommand() {
     }
@@ -85,5 +86,13 @@ public class StopCommand extends RebootCommand {
 
     public boolean checkBeforeCleanup() {
         return this.checkBeforeCleanup;
+    }
+
+    public String getControlIp(){
+        return controlIp;
+    }
+
+    public void setControlIp(String controlIp){
+        this.controlIp =controlIp;
     }
 }

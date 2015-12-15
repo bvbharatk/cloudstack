@@ -45,7 +45,7 @@ fi
 NAME="$(basename $(readlink -f $0))"
 export SERVICE_NAME="$NAME"
 stop() {
-	SHUTDOWN_WAIT="30"
+	SHUTDOWN_WAIT="100"
 	count="0"
 	if [ -f /var/run/${NAME}.pid ]; then
 		pid=`cat /var/run/${NAME}.pid`

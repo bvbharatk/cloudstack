@@ -731,24 +731,31 @@ NetworkMigrationResponder, AggregatedCommandExecutor {
         final DataCenterVO dcVO = _dcDao.findById(network.getDataCenterId());
         final NetworkTopology networkTopology = networkTopologyContext.retrieveNetworkTopology(dcVO);
 
-        // If any router is running then send save password command otherwise
-        // save the password in DB
+        // If any router is not running then save the password in DB
+        //applied true implies we have applied the password successfully on at
+        //least one router. save true implies we have to save the password to send
+        //it to the remaining routers.
+        Boolean applied=true,save=false;
         for (final VirtualRouter router : routers) {
             if (router.getState() == State.Running) {
-                return networkTopology.savePasswordToRouter(network, nic, uservm, router);
-            }
+                applied=networkTopology.savePasswordToRouter(network, nic, uservm, router);
+            }else save=true;
         }
-        final String password = (String) uservm.getParameter(VirtualMachineProfile.Param.VmPassword);
-        final String password_encrypted = DBEncryptionUtil.encrypt(password);
-        final UserVmVO userVmVO = _userVmDao.findById(vm.getId());
+        if(save && applied){
+            final String password = (String) uservm.getParameter(VirtualMachineProfile.Param.VmPassword);
+            final String password_encrypted = DBEncryptionUtil.encrypt(password);
+            final UserVmVO userVmVO = _userVmDao.findById(vm.getId());
 
-        _userVmDao.loadDetails(userVmVO);
-        userVmVO.setDetail("password", password_encrypted);
-        _userVmDao.saveDetails(userVmVO);
+            _userVmDao.loadDetails(userVmVO);
+            userVmVO.setDetail("password", password_encrypted);
+            _userVmDao.saveDetails(userVmVO);
 
-        userVmVO.setUpdateParameters(true);
-        _userVmDao.update(userVmVO.getId(), userVmVO);
-
+            userVmVO.setUpdateParameters(true);
+            _userVmDao.update(userVmVO.getId(), userVmVO);
+        }
+        if(!save && !applied){
+            return false;
+        }
         return true;
     }
 
